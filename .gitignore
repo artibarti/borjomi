@@ -1,0 +1,41 @@
+###############
+## Visual code
+###############
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history
+
+#################
+## CMake
+#################
+
+CMakeCache.txt
+CMakeFiles*
+ALL_BUILD*
+ZERO_CHECK*
+cotire/
+Makefile
+cmake-uninstall.cmake
+cmake_install.cmake
+borjomi-config-version.cmake
+borjomi-config.cmake
+borjomi-targets.cmake
+examples/*.cmake
+
+#################
+## Other
+#################
+
+*.exe
+*.dll
+*.bin
+*.pb.cc
+*.pb.h
+CMakeFiles*
+build*
+DartConfiguration.tcl
+build/*
