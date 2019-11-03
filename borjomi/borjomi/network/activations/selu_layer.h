@@ -8,11 +8,8 @@ namespace borjomi {
 
 class SeluLayer : public ActivationLayer {
 
- public:  
-  SeluLayer(size_t dim, const float lambda = 1.05070, const float alpha  = 1.67326)
-    : SeluLayer(shape3d_t(dim, 1, 1), lambda, alpha) {}
-  
-  SeluLayer(const shape3d_t &shape, const float lambda = 1.05070, const float alpha  = 1.67326) : ActivationLayer(shape) {
+ public:
+  SeluLayer(const float lambda = 1.05070, const float alpha  = 1.67326) : ActivationLayer() {
     params["lambda"] = lambda;
     params["alpha"] = alpha;
   }

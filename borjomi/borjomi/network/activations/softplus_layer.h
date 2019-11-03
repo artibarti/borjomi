@@ -3,18 +3,13 @@
 #include <string>
 
 #include "borjomi/network/activations/activation_layer.h"
-#include "borjomi/network/layers/layer.h"
 
 namespace borjomi {
 
 class SoftplusLayer : public ActivationLayer {
 
  public:
-
-  SoftplusLayer(size_t dim, const float beta = 1.0, const float threshold = 20.0)
-    : SoftplusLayer(shape3d_t(dim, 1, 1), beta, threshold) {}
-
-  SoftplusLayer(const shape3d_t &shape, const float beta = 1.0, const float threshold = 20.0) : ActivationLayer(shape) {
+  SoftplusLayer(const float beta = 1.0, const float threshold = 20.0) : ActivationLayer() {
     params["beta"] = beta;
     params["threshold"] = threshold;
   }

@@ -77,9 +77,9 @@ int main() {
 
   Network net;
   net << FullyConnectedLayer(1, 10, true, borjomi::engine_t::threads);
-  net << TanhLayer(10);
+  net << TanhLayer();
   net << FullyConnectedLayer(10, 10, true, borjomi::engine_t::threads);
-  net << TanhLayer(10);
+  net << TanhLayer();
   net << FullyConnectedLayer(10, 1, true, borjomi::engine_t::threads);
 
   matrix_t x;

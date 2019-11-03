@@ -10,8 +10,7 @@ namespace borjomi {
 class EluLayer : public ActivationLayer {
 
  public:
-  explicit EluLayer(unsigned dim, const float alpha = 1.0) : EluLayer(shape3d_t(dim, 1, 1), alpha) {}
-  explicit EluLayer(const shape3d_t& shape, const float alpha = 1.0) : ActivationLayer(shape) {
+  EluLayer(const float alpha = 1.0) : ActivationLayer() {
     params["alpha"] = alpha;
   }
 

@@ -133,8 +133,18 @@ void LayerSequence::connect(Layer* first, Layer* second) {
 
 template<typename T>
 void LayerSequence::addLayer(T&& layer) {
-    
+
   layers.push_back(std::make_shared<typename std::remove_reference<T>::type>(std::forward<T>(layer)));
+
+  if (layers.back() -> isActivation()) {
+    if (layers.size() == 1) {
+      throw new BorjomiRuntimeException("An activation layer should not be the first one in the network");
+    } else {
+      getLayer(layers.size() - 2) -> getOutputShape();
+      layers.back() -> setInputShape(getLayer(layers.size() - 2) -> getOutputShape());
+      layers.back() -> setOutputShape(getLayer(layers.size() - 2) -> getOutputShape());
+    }
+  }
 
   if (layers.size() != 1) {
     auto first = getLayer(layers.size() - 2);

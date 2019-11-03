@@ -16,7 +16,7 @@ namespace borjomi {
 
       TrainableLayer(const shape3d_t& inShape, const shape3d_t& outShape,
         bool hasBias = false, engine_t engine = engine_t::internal)
-        : Layer(inShape, outShape, engine) {
+        : Layer(inShape, outShape, false, true, engine) {
 
         registerEdge("weight", content_t::weight);
         hasBias_ = hasBias;

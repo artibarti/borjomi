@@ -10,8 +10,7 @@ namespace borjomi {
 class LeakyReluLayer : public ActivationLayer {
 
  public:
-  explicit LeakyReluLayer(unsigned dim, const float epsilon = 0.01) : LeakyReluLayer(shape3d_t(dim, 1, 1), epsilon) {}
-  explicit LeakyReluLayer(const shape3d_t &shape, const float epsilon = 0.01) : ActivationLayer(shape) {
+  LeakyReluLayer(const float epsilon = 0.01) : ActivationLayer() {
     params["epsilon"] = epsilon;
   }
 

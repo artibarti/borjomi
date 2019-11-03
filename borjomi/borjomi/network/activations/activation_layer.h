@@ -12,8 +12,7 @@ namespace borjomi {
 class ActivationLayer : public Layer {
 
  public:
-  ActivationLayer(size_t dim = 0) : ActivationLayer(shape3d_t(1, dim, 1)) {}
-  ActivationLayer(const shape3d_t& shape) : Layer(shape, shape) {}
+  ActivationLayer() : Layer(shape3d_t(0, 0, 0), shape3d_t(0, 0, 0), true, false) {}
 
   void forwardPropagation() override {
     matrix_t& inData = getEdgeData("incomingEdge");

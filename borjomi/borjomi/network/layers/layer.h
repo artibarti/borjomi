@@ -14,6 +14,10 @@ class Layer {
  private:
   shape3d_t inputShape_;
   shape3d_t outputShape_;
+
+  bool isTrainable_;
+  bool isActivation_;
+
   engine_t engine_;
   std::map<std::string, edgeptr_t> edges;
 
@@ -21,7 +25,9 @@ class Layer {
   virtual ~Layer() = default;
 
   Layer();
-  Layer(const shape3d_t& inShape, const shape3d_t& outShape, engine_t engine = engine_t::internal);
+  Layer(const shape3d_t& inShape, const shape3d_t& outShape,
+    bool isActivation, bool isTrainable, engine_t engine = engine_t::internal);
+
   Layer(const Layer&) = default;
   Layer &operator=(const Layer&) = default;
 
@@ -33,6 +39,9 @@ class Layer {
 
   size_t getInDataSize() const;
   size_t getOutDataSize() const;
+
+  bool isActivation() const;
+  bool isTrainable() const;
 
   virtual std::pair<float, float> getOutValueRange() const;
 
@@ -70,10 +79,14 @@ class Layer {
 
 Layer::Layer() {}
 
-Layer::Layer(const shape3d_t& inShape, const shape3d_t& outShape, engine_t engine) {
+Layer::Layer(const shape3d_t& inShape, const shape3d_t& outShape,
+  bool isActivation, bool isTrainable, engine_t engine) {
+  
   inputShape_ = inShape;
   outputShape_ = outShape;
   engine_ = engine;
+  isTrainable_ = isTrainable;
+  isActivation_ = isActivation;
 
   registerEdge("incomingEdge", content_t::data);
   registerEdge("outgoingEdge", content_t::data);
@@ -93,6 +106,14 @@ size_t Layer::getInDataSize() const {
 
 size_t Layer::getOutDataSize() const {
   return outputShape_.size();
+}
+
+bool Layer::isActivation() const {
+  return isActivation_;
+}
+
+bool Layer::isTrainable() const {
+  return isTrainable_;
 }
 
 std::pair<float, float> Layer::getOutValueRange() const {

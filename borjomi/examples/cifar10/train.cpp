@@ -26,17 +26,17 @@ void constructNetwork(Network& net) {
 
   net << conv(32, 32, 3, 5, 5, 32, padding::same, true, engine_t::avx);
   net << pool(32, 32, 32, 2);
-  net << relu(8192);
+  net << relu();
   net << conv(16, 16, 32, 5, 5, 32, padding::same, true, engine_t::avx);
   net << pool(16, 16, 32, 2);
-  net << relu(2048);
+  net << relu();
   net << conv(8, 8, 32, 5, 5, 64, padding::same, true, engine_t::avx);
   net << pool(8, 8, 64, 2);
-  net << relu(1024);
+  net << relu();
   net << fc(1024, 64, true, engine_t::avx);
-  net << relu(64);
+  net << relu();
   net << fc(64, 10, true, engine_t::avx);
-  net << softmax(10);
+  net << softmax();
 }
 
 void train(std::string dataDirPath) {

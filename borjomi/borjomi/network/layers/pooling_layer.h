@@ -19,7 +19,7 @@ namespace borjomi {
     public:
       PoolingLayer(size_t inWidth, size_t inHeight, size_t inChannels, size_t poolingSize, engine_t engine = engine_t::internal)
        : Layer(shape3d_t(inHeight, inWidth, inChannels), shape3d_t(calcOutDim(inHeight, poolingSize),
-         calcOutDim(inWidth, poolingSize), inChannels), engine), poolingSize_(poolingSize) {}
+         calcOutDim(inWidth, poolingSize), inChannels), false, false, engine), poolingSize_(poolingSize) {}
 
       PoolingLayer(PoolingLayer&& other) : Layer(std::move(other)) {
         indices_ = other.indices_;

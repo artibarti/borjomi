@@ -43,7 +43,7 @@ void train(Network& net, matrix_t& x, matrix_t& sinx) {
   auto onEnumerateEpoch = [&]() {  
     iEpoch++;
     if (iEpoch % 100) return;
-    double loss = net.getLoss<Mse>(x, sinx);
+    double loss = net.getLoss<LossFunctionType::Mse>(x, sinx);
     std::cout << "epoch = " << iEpoch << "/" << NUMBER_OF_EPOCHS << " loss = " << loss << std::endl;
   };
 
@@ -76,9 +76,9 @@ int main() {
   
   Network net;
   net << FullyConnectedLayer(1, 10, true, borjomi::engine_t::avx);
-  net << TanhLayer(10);
+  net << TanhLayer();
   net << FullyConnectedLayer(10, 10, true, borjomi::engine_t::avx);
-  net << TanhLayer(10);
+  net << TanhLayer();
   net << FullyConnectedLayer(10, 1, true, borjomi::engine_t::avx);
 
   matrix_t x;
