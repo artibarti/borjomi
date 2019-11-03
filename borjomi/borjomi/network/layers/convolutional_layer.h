@@ -30,10 +30,15 @@ class ConvolutionalLayer : public TrainableLayer {
  public:
   ConvolutionalLayer(size_t inWidth, size_t inHeight, size_t inChannels, size_t kernelWidth, size_t kernelHeight,
     size_t outChannels, padding paddingType = padding::valid, bool hasBias = true, engine_t engine = engine_t::internal)
-    : TrainableLayer(shape3d_t(inWidth, inHeight, inChannels), shape3d_t(inWidth, inHeight, outChannels), hasBias, engine) {
+    : TrainableLayer(shape3d_t(inWidth, inHeight, inChannels),
+      shape3d_t(convOutLength(inWidth, kernelWidth, paddingType),
+        convOutLength(inHeight, kernelHeight, paddingType),
+          outChannels), hasBias, engine) {
 
     shape3d_t inShape = shape3d_t(inWidth, inHeight, inChannels);
-    shape3d_t outShape = shape3d_t(inWidth, inHeight, outChannels);
+    shape3d_t outShape =
+      shape3d_t(convOutLength(inWidth, kernelWidth, paddingType),
+        convOutLength(inHeight, kernelHeight, paddingType), outChannels);
 
     padding_ = 2;
     setConvParams(inShape, outShape, kernelWidth, kernelHeight, paddingType);
@@ -137,6 +142,19 @@ class ConvolutionalLayer : public TrainableLayer {
   size_t inLength(size_t inLength, size_t windowSize, padding padType) const {
     return padType == padding::same ? (inLength + windowSize - 1) : inLength;
   }
+
+  size_t convOutLength(size_t inLength, size_t windowSize, padding padType) {
+    size_t outLength;
+    if (padType == padding::same) {
+      outLength = inLength;
+    } else if (padType == padding::valid) {
+      outLength = inLength - windowSize + 1;
+    } else {
+      throw BorjomiRuntimeException("Padding type is not supported.");
+    }
+    return outLength;
+  }
+
 };
 
 }

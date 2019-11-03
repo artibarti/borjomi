@@ -58,16 +58,16 @@ static void constructNet(Network& network, engine_t engine) {
      << tanh();
     */
 
-  network << conv(32, 32, 1, 5, 5, 6, padding::same, true, engine)
+  network << conv(32, 32, 1, 5, 5, 6, padding::valid, true, engine)
         << tanh()
         << ave_pool(28, 28, 6, 2)
         << tanh()
         // << conv(14, 14, 5, 6, 16, connection_table(tbl, 6, 16), padding::valid, true, engine)
-        << conv(14, 14, 6, 5, 5, 16, padding::same, true, engine)
+        << conv(14, 14, 6, 5, 5, 16, padding::valid, true, engine)
         << tanh()
         << ave_pool(10, 10, 16, 2)
         << tanh()
-        << conv(5, 5, 16, 5, 5, 120, padding::same, true, engine)
+        << conv(5, 5, 16, 5, 5, 120, padding::valid, true, engine)
         << tanh()
         << fc(120, 10, true, engine)
         << tanh();
@@ -87,10 +87,10 @@ static void train(const std::string &dataDirPath, double learningRate,
   std::vector<label_t> train_labels, test_labels;
   matrix_t train_images, test_images;
 
-  parseMnistLabels(dataDirPath + "/train-labels.idx1-ubyte", &train_labels);
-  parseMnistImages(dataDirPath + "/train-images.idx3-ubyte", &train_images, -1.0, 1.0, 2, 2);
-  parseMnistLabels(dataDirPath + "/t10k-labels.idx1-ubyte", &test_labels);
-  parseMnistImages(dataDirPath + "/t10k-images.idx3-ubyte", &test_images, -1.0, 1.0, 2, 2);
+  parseMnistLabels(dataDirPath + "/train-labels-idx1-ubyte", &train_labels);
+  parseMnistImages(dataDirPath + "/train-images-idx3-ubyte", &train_images, -1.0, 1.0, 2, 2);
+  parseMnistLabels(dataDirPath + "/t10k-labels-idx1-ubyte", &test_labels);
+  parseMnistImages(dataDirPath + "/t10k-images-idx3-ubyte", &test_images, -1.0, 1.0, 2, 2);
 
   std::cout << "start training" << std::endl;
 
