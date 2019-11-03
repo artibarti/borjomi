@@ -12,20 +12,8 @@ if(MSVC)
     endforeach()
 endif()
 
-add_executable(example_sinus_fit sinus_fit/sinus_fit_internal.cpp ${borjomi_headers})
+add_executable(example_sinus_fit sinus_fit/sinus_fit.cpp ${borjomi_headers})
 target_link_libraries(example_sinus_fit
-        ${project_library_target_name} ${REQUIRED_LIBRARIES})
-
-add_executable(example_sinus_fit_avx sinus_fit/sinus_fit_avx.cpp ${borjomi_headers})
-target_link_libraries(example_sinus_fit_avx
-        ${project_library_target_name} ${REQUIRED_LIBRARIES})
-
-add_executable(example_sinus_fit_cuda sinus_fit/sinus_fit_cuda.cpp ${borjomi_headers})
-target_link_libraries(example_sinus_fit_cuda
-        ${project_library_target_name} ${REQUIRED_LIBRARIES})
-
-add_executable(example_sinus_fit_threads sinus_fit/sinus_fit_threads.cpp ${borjomi_headers})
-target_link_libraries(example_sinus_fit_threads
         ${project_library_target_name} ${REQUIRED_LIBRARIES})
 
 add_executable(example_cifar_train cifar10/train.cpp ${borjomi_headers})
