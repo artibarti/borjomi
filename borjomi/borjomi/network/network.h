@@ -194,7 +194,7 @@ Result Network::test(const matrix_t& input, const std::vector<label_t>& expected
   for (size_t sampleIdx = 0; sampleIdx < splittedInput.size(); sampleIdx++) {
     matrix_t result = forwardProp(splittedInput[sampleIdx]);
     label_t predictedLabel = getIndexOfMaxElementInRow(result, 0);    
-    testResult.addSingleTestSampleResult(predictedLabel == expectedLabels[sampleIdx]);
+    testResult.addPredictionResult(predictedLabel == expectedLabels[sampleIdx]);
   }
   return testResult;
 }

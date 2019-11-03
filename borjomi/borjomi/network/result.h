@@ -23,7 +23,7 @@ struct Result {
     return float(numberOfSuccessfulPredictions * 100.0 / numberOfTotalPredictions);
   }
 
-  void addSingleTestSampleResult(bool success) {
+  void addPredictionResult(bool success) {
     numberOfTotalPredictions++;
     if (success) {
       numberOfSuccessfulPredictions++;
