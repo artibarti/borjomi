@@ -7,17 +7,13 @@
 */
 #pragma once
 
-#ifdef CNN_USE_AVX2
-  #include <immintrin.h>
-#endif
+#include <immintrin.h>
 #include <vector>
 
 #include "borjomi/engine/engine.h"
 
 namespace borjomi {
 namespace kernels {
-
-#ifdef CNN_USE_AVX2
 
 void accumulateBiasDelta(const shape3d_t& out, const float* currDelta, float* db) {
 
@@ -640,22 +636,18 @@ void avx_conv2d_5x5_back_kernel_one(const shape3d_t& inShape, const shape3d_t& i
   }
 }
 
-#endif
-
 void convBackwardAvx(const matrix_t& prevOut, const matrix_t& W, matrix_t& dW,
   matrix_t& db, const matrix_t& currDelta, matrix_t& prevDelta, const shape3d_t& inShape,
   const shape3d_t& inPaddedShape, const shape3d_t& outShape, const shape3d_t& weightShape) {
 
-  #ifdef CNN_USE_AVX2
-    engine::threads::parallelized2DLoop(prevOut.rows(), 1, 1, 1, [&](size_t sampleIdx, size_t toIgnore) {
-      avx_conv2d_5x5_back_kernel_one(inShape, inPaddedShape, outShape, weightShape, &prevOut.at(sampleIdx, 0), &W.at(0), &dW.at(0),
-        &db.at(0), &currDelta.at(sampleIdx, 0), &prevDelta.at(sampleIdx, 0));
-      accumulateWeightDelta(inShape, inPaddedShape, outShape, weightShape, &prevOut.at(sampleIdx, 0), &currDelta.at(sampleIdx, 0), &dW.at(0));      
-      if (!db.isEmpty()) {
-        accumulateBiasDelta(outShape, &currDelta.at(sampleIdx, 0), &db.at(0));
-      }
-    });
-  #endif
+  engine::threads::parallelized2DLoop(prevOut.rows(), 1, 1, 1, [&](size_t sampleIdx, size_t toIgnore) {
+    avx_conv2d_5x5_back_kernel_one(inShape, inPaddedShape, outShape, weightShape, &prevOut.at(sampleIdx, 0), &W.at(0), &dW.at(0),
+      &db.at(0), &currDelta.at(sampleIdx, 0), &prevDelta.at(sampleIdx, 0));
+    accumulateWeightDelta(inShape, inPaddedShape, outShape, weightShape, &prevOut.at(sampleIdx, 0), &currDelta.at(sampleIdx, 0), &dW.at(0));      
+    if (!db.isEmpty()) {
+      accumulateBiasDelta(outShape, &currDelta.at(sampleIdx, 0), &db.at(0));
+    }
+  });
 }
 
 }

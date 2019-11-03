@@ -7,13 +7,10 @@
 */
 #pragma once
 
-#ifdef CNN_USE_AVX2
-  #include <immintrin.h>
-#endif
-
+#include <immintrin.h>
 #include <vector>
-#include "borjomi/engine/engine.h"
 
+#include "borjomi/engine/engine.h"
 
 namespace borjomi {
 namespace kernels {
@@ -21,8 +18,6 @@ namespace kernels {
 void convForwardAvx(const matrix_t& inData, const matrix_t& W,
   const matrix_t& bias, matrix_t& outData, const shape3d_t& inShape, const shape3d_t& inPaddedShape,
   const shape3d_t& outShape, const shape3d_t& weightShape) {
-
-  #ifdef CNN_USE_AVX2
 
   if (!bias.isEmpty()) {
     engine::threads::parallelized2DLoop(inData.rows(), outShape.channels_, 1, 1, [&](size_t sampleIdx, size_t outChannelIdx) {
@@ -185,7 +180,6 @@ void convForwardAvx(const matrix_t& inData, const matrix_t& W,
         }
       }
     });
-    #endif
   }
 }
 }

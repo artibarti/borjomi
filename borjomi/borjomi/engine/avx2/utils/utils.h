@@ -7,16 +7,12 @@
 */
 #pragma once
 
-// #ifndef CNN_USE_AVX
-//   #error Advanced Vector Extensions required.
-// #endif
-
 #ifndef _mm256_set_m128
 #define _mm256_set_m128(va, vb) \
   _mm256_insertf128_ps(_mm256_castps128_ps256(vb), va, 1)
 #endif
 
-#ifdef CNN_USE_AVX2
+#ifdef USE_AVX2
 inline __m256 madd256_ps(__m256 a, __m256 b, __m256 c) {
   return _mm256_fmadd_ps(a, b, c);
 }
@@ -193,7 +189,7 @@ struct foobar : std::false_type {};
 
 // Byte Shift YMM Register Across 128-bit Lanes
 
-#ifdef CNN_USE_AVX2
+#ifdef USE_AVX2
 
 template <bool>
 struct Range;

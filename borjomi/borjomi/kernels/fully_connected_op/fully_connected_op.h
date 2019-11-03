@@ -8,9 +8,14 @@
 #include "borjomi/kernels/fully_connected_op/fully_connected_op_forward_threads.h"
 #include "borjomi/kernels/fully_connected_op/fully_connected_op_backward_threads.h"
 
-#ifdef CNN_USE_AVX2
+#ifdef USE_AVX2
   #include "borjomi/kernels/fully_connected_op/fully_connected_op_forward_avx.h"
   #include "borjomi/kernels/fully_connected_op/fully_connected_op_backward_avx.h"
+#endif
+
+#ifdef USE_CUDA
+  #include "borjomi/kernels/fully_connected_op/fully_connected_op_forward_cuda.h"
+  #include "borjomi/kernels/fully_connected_op/fully_connected_op_backward_cuda.h"
 #endif
 
 namespace borjomi {
@@ -21,9 +26,13 @@ namespace borjomi {
     if (engine == engine_t::internal) {
       kernels::fullyConnectedForwardInternal(inData, weights, bias, outData);
     } else if (engine == engine_t::threads) {
+      #ifdef USE_THREADS
         kernels::fullyConnectedForwardThreads(inData, weights, bias, outData);
+      #else
+        throw BorjomiRuntimeException("Borjomi was not built with thread support");
+      #endif
     } else if (engine == engine_t::avx) {
-      #ifdef CNN_USE_AVX2
+      #ifdef USE_AVX2
         kernels::fullyConnectedForwardAvx(inData, weights, bias, outData);
       #else
         throw BorjomiRuntimeException("Borjomi was not built with AVX support");
@@ -39,9 +48,13 @@ namespace borjomi {
     if (engine == engine_t::internal) {
       kernels::fullyConnectedBackwardInternal(prevOut, weights, dWeights, dBias, currDelta, prevDelta);
     } else if (engine == engine_t::threads) {
+      #ifdef USE_THREADS
         kernels::fullyConnectedBackwardThreads(prevOut, weights, dWeights, dBias, currDelta, prevDelta);
+      #else
+        throw BorjomiRuntimeException("Borjomi was not built with thread support");
+      #endif
     } else if (engine == engine_t::avx) {
-      #ifdef CNN_USE_AVX2
+      #ifdef USE_AVX2
         kernels::fullyConnectedBackwardAvx(prevOut, weights, dWeights, dBias, currDelta, prevDelta);
       #else
         throw BorjomiRuntimeException("Borjomi was not built with AVX support");

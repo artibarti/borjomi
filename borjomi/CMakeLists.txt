@@ -60,6 +60,14 @@ option(USE_CUDA       "Build borjomi with OpenCL library support"         OFF)
 option(BUILD_EXAMPLES "Set to ON to build examples"                         ON)
 
 ###############################################################
+###### Add examples if needed #################################
+###############################################################
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif(BUILD_EXAMPLES)
+
+###############################################################
 ###### Create the library target ##############################
 ###############################################################
 
@@ -103,6 +111,7 @@ endif(USE_INTEL_MKL)
 
 if(USE_THREADS)
   if(NOT WIN32)
+    add_definitions(-DUSE_THREADS)
     set(USE_PTHREAD ON)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     message(STATUS "Using Pthread")
@@ -142,7 +151,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR MINGW OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     #############################################
 
     if(USE_AVX2 AND COMPILER_HAS_AVX2_FLAG)
-        add_definitions(-DCNN_USE_AVX2)
+        add_definitions(-DUSE_AVX2)
         set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -mavx2 -mfma -march=core-avx2")
     endif(USE_AVX2 AND COMPILER_HAS_AVX2_FLAG)
 
@@ -176,7 +185,7 @@ if(MSVC)
     #############################################
 
     if(USE_AVX2)
-        add_definitions(-DCNN_USE_AVX2)
+        add_definitions(-DUSE_AVX2)
         set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} /arch:AVX2")
     endif(USE_AVX2)
 
@@ -248,20 +257,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:${include_install_dir_full}>)
 
-## include(CMakePackageConfigHelpers)
-## configure_package_config_file(
-##     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Templates/${cmake_conf_file}.in"
-##     "${CMAKE_CURRENT_BINARY_DIR}/${cmake_conf_file}"
-##     PATH_VARS include_install_dir_full
-##     INSTALL_DESTINATION ${config_install_dir})
-## 
-## write_basic_package_version_file(
-##     ${CMAKE_CURRENT_BINARY_DIR}/${cmake_conf_version_file}
-##     VERSION ${PROJECT_VERSION}
-##     COMPATIBILITY SameMajorVersion)
-
-set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${EXTRA_C_FLAGS}")
-# Create *-targets.cmake file for build directory
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_C_FLAGS}")
 install(TARGETS ${project_library_target_name}
         EXPORT  ${targets_export_name}
         INCLUDES DESTINATION ${include_install_dir})
@@ -269,32 +265,22 @@ install(TARGETS ${project_library_target_name}
 export(EXPORT ${targets_export_name}
        FILE   ${CMAKE_CURRENT_BINARY_DIR}/${cmake_targets_file})
 
-# Install *-targets.cmake file
 install(EXPORT      ${targets_export_name}
         NAMESPACE   ${namespace}
         DESTINATION ${config_install_dir})
 
-# Install config files
 install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/${cmake_conf_version_file}"
     "${PROJECT_SOURCE_DIR}/cmake/Modules/find_intel_mkl.cmake"
     DESTINATION ${config_install_dir} COMPONENT cmake)
 
-# Install headers
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/${project_library_target_name}
         DESTINATION ${include_install_dir})
 
-### Check if protobuf available
-## include(cmake/protoc.cmake)
+##############################################################
+###### Create configuration summary ##########################
+##############################################################
 
-# Subdirectories for examples, testing and documentation
-# TODO: explain in brief about different examples, test and docs.
-if(BUILD_EXAMPLES)
-    add_subdirectory(examples)
-endif(BUILD_EXAMPLES)
-
-####
-# Configuration summary
 include(cmake/summary.cmake)
 printConfigurationSummary()
 

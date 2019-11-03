@@ -4,7 +4,7 @@
 #include "borjomi/engine/internal/kernels/kernels.h"
 
 #include <immintrin.h>
-#include "borjomi/engine/avx/utils/utils2.h"
+#include "borjomi/engine/avx2/utils/utils2.h"
 
 namespace borjomi {
  namespace engine {
