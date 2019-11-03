@@ -126,6 +126,7 @@ void LayerSequence::connect(Layer* first, Layer* second) {
   auto outShape = first->getOutputShape();
   auto inShape  = second->getInputShape();
   if (outShape.size() != inShape.size()) {
+    std::cout << inShape << " " << outShape << std::endl;
     throw BorjomiRuntimeException("Impossible to connect layers due to dimension mismatch");
   }
   second->setEdge("incomingEdge", first->getEdge("outgoingEdge"));

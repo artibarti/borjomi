@@ -60,14 +60,6 @@ option(USE_CUDA       "Build borjomi with OpenCL library support"         OFF)
 option(BUILD_EXAMPLES "Set to ON to build examples"                         ON)
 
 ###############################################################
-###### Add examples if needed #################################
-###############################################################
-
-if(BUILD_EXAMPLES)
-    add_subdirectory(examples)
-endif(BUILD_EXAMPLES)
-
-###############################################################
 ###### Create the library target ##############################
 ###############################################################
 
@@ -142,7 +134,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR MINGW OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     #############################################
 
     if(USE_AVX AND COMPILER_HAS_AVX_FLAG)
-        add_definitions(-DCNN_USE_AVX)
+        add_definitions(-DUSE_AVX)
         set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} -mavx")
     endif(USE_AVX AND COMPILER_HAS_AVX_FLAG)
 
@@ -185,7 +177,7 @@ if(MSVC)
     #############################################
 
     if(USE_AVX2)
-        add_definitions(-DUSE_AVX2)
+        add_definitions(-DCNN_USE_AVX2)
         set(EXTRA_C_FLAGS "${EXTRA_C_FLAGS} /arch:AVX2")
     endif(USE_AVX2)
 
@@ -257,7 +249,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:${include_install_dir_full}>)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_C_FLAGS}")
+set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${EXTRA_C_FLAGS}")
 install(TARGETS ${project_library_target_name}
         EXPORT  ${targets_export_name}
         INCLUDES DESTINATION ${include_install_dir})
@@ -278,7 +270,15 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/${project_library_target_name}
         DESTINATION ${include_install_dir})
 
 ##############################################################
-###### Create configuration summary ##########################
+###### Add examples if needed ################################
+##############################################################
+
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif(BUILD_EXAMPLES)
+
+##############################################################
+###### Create config summary #################################
 ##############################################################
 
 include(cmake/summary.cmake)

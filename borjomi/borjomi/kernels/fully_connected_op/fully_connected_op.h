@@ -5,8 +5,10 @@
 #include "borjomi/kernels/fully_connected_op/fully_connected_op_forward_internal.h"
 #include "borjomi/kernels/fully_connected_op/fully_connected_op_backward_internal.h"
 
-#include "borjomi/kernels/fully_connected_op/fully_connected_op_forward_threads.h"
-#include "borjomi/kernels/fully_connected_op/fully_connected_op_backward_threads.h"
+#ifdef USE_THREADS
+  #include "borjomi/kernels/fully_connected_op/fully_connected_op_forward_threads.h"
+  #include "borjomi/kernels/fully_connected_op/fully_connected_op_backward_threads.h"
+#endif
 
 #ifdef USE_AVX2
   #include "borjomi/kernels/fully_connected_op/fully_connected_op_forward_avx.h"

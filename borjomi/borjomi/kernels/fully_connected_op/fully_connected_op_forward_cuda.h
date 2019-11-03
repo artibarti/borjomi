@@ -13,7 +13,7 @@ namespace kernels {
       engine::internal::copy(0.0, false, bias.rows(), bias.cols(),
         bias.data(), outData.rows(), outData.cols(), outData.data());
     }
-    engine::avx::multiply(1.0, false, inData.rows(), inData.cols(), inData.data(),
+    engine::cuda::multiply(1.0, false, inData.rows(), inData.cols(), inData.data(),
       true, weights.rows(), weights.cols(), weights.data(), 1.0, outData.data());
   }
 }

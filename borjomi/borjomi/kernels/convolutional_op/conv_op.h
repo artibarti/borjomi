@@ -3,8 +3,10 @@
 #include "borjomi/kernels/convolutional_op/conv_op_forward_internal.h"
 #include "borjomi/kernels/convolutional_op/conv_op_backward_internal.h"
 
-#include "borjomi/kernels/convolutional_op/conv_op_forward_threads.h"
-#include "borjomi/kernels/convolutional_op/conv_op_backward_threads.h"
+#ifdef USE_THREADS
+  #include "borjomi/kernels/convolutional_op/conv_op_forward_threads.h"
+  #include "borjomi/kernels/convolutional_op/conv_op_backward_threads.h"
+#endif
 
 #ifdef USE_AVX2
   #include "borjomi/kernels/convolutional_op/conv_op_forward_avx.h"
@@ -19,7 +21,11 @@ namespace borjomi {
     if (engine == engine_t::internal) {
       kernels::convForwardInternal(inData, weights, bias, outData, params.in, params.in_padded, params.out, params.weight);
     } else if (engine == engine_t::threads) {
+      #ifdef USE_THREADS
         kernels::convForwardThreads(inData, weights, bias, outData, params.in, params.in_padded, params.out, params.weight);
+      #else
+        throw BorjomiRuntimeException("Borjomi was not built with thread support");
+      #endif
     } else if (engine == engine_t::avx) {
       #ifdef USE_AVX2
         kernels::convForwardAvx(inData, weights, bias, outData, params.in, params.in_padded, params.out, params.weight);
@@ -37,7 +43,11 @@ namespace borjomi {
     if (engine == engine_t::internal) {
       kernels::convBackwardInternal(prevOut, weights, dWeights, dBias, currDelta, prevDelta, params.in, params.in_padded, params.out, params.weight);
     } else if (engine == engine_t::threads) {
+      #ifdef USE_THREADS
         kernels::convBackwardThreads(prevOut, weights, dWeights, dBias, currDelta, prevDelta, params.in, params.in_padded, params.out, params.weight);
+      #else
+        throw BorjomiRuntimeException("Borjomi was not built with thread support");
+      #endif
     } else if (engine == engine_t::avx) {
       #ifdef USE_AVX2
         kernels::convBackwardAvx(prevOut, weights, dWeights, dBias, currDelta, prevDelta, params.in, params.in_padded, params.out, params.weight);

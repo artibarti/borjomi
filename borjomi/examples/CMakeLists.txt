@@ -20,6 +20,10 @@ add_executable(example_cifar_train cifar10/train.cpp ${borjomi_headers})
 target_link_libraries(example_cifar_train
         ${project_library_target_name} ${REQUIRED_LIBRARIES})
 
+add_executable(example_mnist_train mnist/train.cpp ${borjomi_headers})
+target_link_libraries(example_mnist_train
+        ${project_library_target_name} ${REQUIRED_LIBRARIES})
+
 add_executable(example_test_multiplication engine_test/testMultiplication.cpp ${borjomi_headers})
 target_link_libraries(example_test_multiplication 
         ${project_library_target_name} ${REQUIRED_LIBRARIES})

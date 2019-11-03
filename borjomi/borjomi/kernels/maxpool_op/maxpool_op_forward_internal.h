@@ -6,7 +6,7 @@
 namespace borjomi {
 namespace kernels {
 
-void maxpoolInternalForward(const matrix_t& inData, matrix_t& outData, const shape3d_t& inShape,
+void maxpoolForwardInternal(const matrix_t& inData, matrix_t& outData, const shape3d_t& inShape,
   const shape3d_t& outShape, matrix_i& maxIndices, size_t poolingSize) {
   
   for (size_t sampleIdx = 0; sampleIdx < inData.rows(); sampleIdx++) {
