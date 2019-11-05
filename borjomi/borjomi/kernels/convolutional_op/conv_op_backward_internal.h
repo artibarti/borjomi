@@ -38,15 +38,16 @@ void convBackwardInternal(const matrix_t& prevOut, const matrix_t& W, matrix_t& 
       for (size_t outChannelIdx = 0; outChannelIdx < outShape.channels_; outChannelIdx++) {
         for (size_t weightRowIdx = 0; weightRowIdx < weightShape.cols_; weightRowIdx++) {
           for (size_t weightColIdx = 0; weightColIdx < weightShape.rows_; weightColIdx++) {
-            float dst{0};
+            float dst = 0;
 
             const float *prevo = &prevOut.at(sampleIdx, inPaddedShape.getIndex(weightRowIdx, weightColIdx, inChannelIdx));
             const float *delta = &currDelta.at(sampleIdx, outShape.getIndex(0, 0, outChannelIdx));
 
-            for (size_t outColIdx = 0; outColIdx < outShape.cols_; outColIdx++) {
+            for (size_t outRowIdx = 0; outRowIdx < outShape.rows_; outRowIdx++) {
               float dot = 0;
-              for (size_t idx = 0; idx < outShape.rows_; idx++) {
-                dot += (prevo + outColIdx * inPaddedShape.rows_)[idx] * (delta + outColIdx * outShape.rows_)[idx];
+              for (size_t outColIdx = 0; outColIdx < outShape.cols_; outColIdx++) {
+                dot += (prevo + outRowIdx * inPaddedShape.cols_)[outColIdx]
+                  * (delta + outRowIdx * outShape.cols_)[outColIdx];
               }
               dst += dot;
             }

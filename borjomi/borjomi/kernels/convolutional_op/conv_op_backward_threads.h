@@ -16,8 +16,8 @@ void convBackwardThreads(const matrix_t& prevOut, const matrix_t& W, matrix_t& d
       const float *pdelta_src = &currDelta.at(sampleIdx, outShape.getIndex(0, 0, outChannelIdx));
       float *pdelta_dst = &prevDelta.at(sampleIdx, inPaddedShape.getIndex(0, 0, inChannelIdx));
 
-      for (size_t outputRowIdx = 0; outputRowIdx < outShape.cols_; outputRowIdx++) {
-        for (size_t outputColIdx = 0; outputColIdx < outShape.rows_; outputColIdx++) {
+      for (size_t outputRowIdx = 0; outputRowIdx < outShape.rows_; outputRowIdx++) {
+        for (size_t outputColIdx = 0; outputColIdx < outShape.cols_; outputColIdx++) {
 
           const float *ppw = pw;
           const float ppdelta_src = pdelta_src[outputRowIdx * outShape.rows_ + outputColIdx];
@@ -34,6 +34,31 @@ void convBackwardThreads(const matrix_t& prevOut, const matrix_t& W, matrix_t& d
   });
 
   engine::threads::parallelized2DLoop(prevOut.rows(), inShape.channels_, 1, 1, [&](size_t sampleIdx, size_t inChannelIdx) {
+
+    for (size_t outChannelIdx = 0; outChannelIdx < outShape.channels_; outChannelIdx++) {
+
+      for (size_t weightRowIdx = 0; weightRowIdx < weightShape.cols_; weightRowIdx++) {
+        for (size_t weightColIdx = 0; weightColIdx < weightShape.rows_; weightColIdx++) {
+
+          float dst = 0;
+          const float *prevo = &prevOut.at(sampleIdx, inPaddedShape.getIndex(weightRowIdx, weightColIdx, inChannelIdx));
+          const float *delta = &currDelta.at(sampleIdx, outShape.getIndex(0, 0, outChannelIdx));
+
+          for (size_t outRowIdx = 0; outRowIdx < outShape.rows_; outRowIdx++) {
+            float dot = 0;
+            for (size_t outColIdx = 0; outColIdx < outShape.cols_; outColIdx++) {
+              dot += (prevo + outRowIdx * inPaddedShape.cols_)[outColIdx]
+                * (delta + outRowIdx * outShape.cols_)[outColIdx];
+            }
+            dst += dot;
+          }
+          dW.at(0, weightShape.getIndex(weightRowIdx, weightColIdx,
+            inShape.channels_ * outChannelIdx + inChannelIdx)) = dst;
+        }
+      }
+    }
+
+    /*
     for (size_t outChannelIdx = 0; outChannelIdx < outShape.channels_; outChannelIdx++) {
       for (size_t weightRowIdx = 0; weightRowIdx < weightShape.cols_; weightRowIdx++) {
         for (size_t weightColIdx = 0; weightColIdx < weightShape.rows_; weightColIdx++) {
@@ -53,6 +78,7 @@ void convBackwardThreads(const matrix_t& prevOut, const matrix_t& W, matrix_t& d
         }
       }
     }
+    */
   });
 
   if (!db.isEmpty()) {
