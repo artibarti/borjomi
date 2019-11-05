@@ -79,8 +79,8 @@ void parseMnistLabels(const std::string& labelFile, std::vector<label_t>* labels
   }
 }
 
-void parseMnistImage(std::ifstream &ifs, const MnistHeader &header, float_t scaleMin,
-  float_t scaleMax, int xPadding, int yPadding, std::vector<float>& dst) {
+void parseMnistImage(std::ifstream &ifs, const MnistHeader &header, float scaleMin,
+  float scaleMax, int xPadding, int yPadding, std::vector<float>& dst) {
   
   const int width  = header.numCols + 2 * xPadding;
   const int height = header.numRows + 2 * yPadding;
@@ -92,14 +92,14 @@ void parseMnistImage(std::ifstream &ifs, const MnistHeader &header, float_t scal
   for (uint32_t y = 0; y < header.numRows; y++) {
     for (uint32_t x = 0; x < header.numCols; x++) {
       dst[width * (y + yPadding) + x + xPadding] =
-        (image_vec[y * header.numCols + x] / float_t(255)) *
+        (image_vec[y * header.numCols + x] / float(255)) *
           (scaleMax - scaleMin) + scaleMin;
     }
   }
 }
 
 void parseMnistImages(const std::string &imageFile, matrix_t* images,
-  float_t scaleMin, float_t scaleMax, int xPadding, int yPadding) {
+  float scaleMin, float scaleMax, int xPadding, int yPadding) {
 
   if (xPadding < 0 || yPadding < 0)
     throw std::invalid_argument("Padding size must not be negative");

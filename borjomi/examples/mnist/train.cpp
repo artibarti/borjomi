@@ -97,8 +97,8 @@ static void train(const std::string &dataDirPath, double learningRate,
   ProgressDisplay disp(train_images.rows());
   Timer timer;
 
-  // optimizer.alpha *=
-  //   std::min(float_t(4), static_cast<float_t>(sqrt(batchSize) * learningRate));
+  optimizer.learningRate *=
+    std::min(float_t(4), static_cast<float_t>(sqrt(batchSize) * learningRate));
 
   int epoch = 1;
   auto on_enumerate_epoch = [&]() {
@@ -109,7 +109,7 @@ static void train(const std::string &dataDirPath, double learningRate,
     Result res = network.test(test_images, test_labels);
     std::cout << res.getNumberOfSuccessfulPredictions() << "/" << res.getNumberOfTotalPredictions() << std::endl;
 
-    disp.restart(train_images.size());
+    disp.restart(train_images.rows());
     timer.start();
   };
 
