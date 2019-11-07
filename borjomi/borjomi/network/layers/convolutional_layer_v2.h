@@ -23,24 +23,25 @@ namespace borjomi {
 class ConvolutionalLayerV2 : public TrainableLayer {
 
  private:
-  size_t padding_;
   shape3d_t weightShape_;
+  size_t kernelSize_;
 
  public:
-  ConvolutionalLayerV2(size_t inWidth, size_t inHeight, size_t inChannels, size_t kernelWidth, size_t kernelHeight,
+  ConvolutionalLayerV2(size_t inWidth, size_t inHeight, size_t inChannels, size_t kernelSize,
     size_t outChannels, padding paddingType = padding::valid, bool hasBias = true, engine_t engine = engine_t::internal)
     : TrainableLayer(shape3d_t(inWidth, inHeight, inChannels),
       shape3d_t(inWidth, inHeight, outChannels), hasBias, engine) {
 
     shape3d_t inShape = shape3d_t(inWidth, inHeight, inChannels);
     shape3d_t outShape = shape3d_t(inWidth, inHeight, outChannels);
-    weightShape_ = shape3d_t(kernelWidth, kernelHeight, inChannels * outChannels);
-    padding_ = 2;
+    kernelSize_ = kernelSize;
+    weightShape_ = shape3d_t(kernelSize, kernelSize, inChannels * outChannels);
   }
 
   ConvolutionalLayerV2(ConvolutionalLayerV2&& other) 
     : TrainableLayer(std::move(other)) {
-    padding_ = other.padding_;
+    kernelSize_ = other.kernelSize_;
+    weightShape_ = other.weightShape_;
   }
 
   void initialize() override {
@@ -74,19 +75,29 @@ class ConvolutionalLayerV2 : public TrainableLayer {
     matrix_t& weights = getEdgeData("weight");
     matrix_t& bias = getEdgeData("bias");
 
+    matrix_t reorganizedInput(inData.shape());
+    matrix_t reorganizedWeights(weights.shape());
+
     for (size_t idx = 0; idx < outData.size(); idx++) {
-      outData.at(idx) = float{0};
+      outData.at(idx) = 0;
     }
+
+    convv2ForwardOp(getEngine(), reorganizedInput, reorganizedWeights,
+      bias, outData, getInputShape(), getOutputShape(), kernelSize_);
   }
 
   void backPropagation() override {
 
-    matrix_t& prevOut = getEdgeData("incomingEdge");
-    matrix_t& weights = getEdgeData("weight");
-    matrix_t& dWeight = getEdgeGradient("weight");
-    matrix_t& db = getEdgeGradient("bias");
-    matrix_t& prevDelta = getEdgeGradient("incomingEdge");
-    matrix_t& currDelta = getEdgeGradient("outgoingEdge");
+    // matrix_t& prevOut = getEdgeData("incomingEdge");
+    // matrix_t& weights = getEdgeData("weight");
+    // matrix_t& dWeight = getEdgeGradient("weight");
+    // matrix_t& db = getEdgeGradient("bias");
+    // matrix_t& prevDelta = getEdgeGradient("incomingEdge");
+    // matrix_t& currDelta = getEdgeGradient("outgoingEdge");
+
+    // for (size_t idx = 0; idx < prevDelta.size(); idx++) {
+    //   prevDelta.at(idx) = 0;
+    // }
   }
 
   std::string getLayerType() const override {
@@ -112,6 +123,24 @@ class ConvolutionalLayerV2 : public TrainableLayer {
     }
   }
 
+  void reorganizeWeights(const matrix_t& weights, matrix_t& reorganizedWeights,
+    size_t kernelSize, const shape3d_t& inShape, const shape3d_t& outShape) {
+
+    for (size_t outChannelIdx = 0; outChannelIdx < outShape.channels_; outChannelIdx++) {
+      size_t idx = 0;
+      for (size_t rowIdx = 0; rowIdx < kernelSize; rowIdx++) {
+        for (size_t colIdx = 0; colIdx < kernelSize; colIdx++) {
+          for (size_t inChannelIdx = 0; inChannelIdx < inShape.channels_; inChannelIdx++) {
+            size_t originalIdx = (outChannelIdx * inShape.channels_ + inChannelIdx) * (kernelSize * kernelSize)
+              + rowIdx * kernelSize + colIdx;
+            size_t newIdx = (outChannelIdx * inShape.channels_) * (kernelSize * kernelSize) + idx;
+            reorganizedWeights.at(0, newIdx) = weights.at(0, originalIdx);
+            idx++;
+          }
+        }
+      }
+    }
+  }
 };
 
 }
