@@ -55,7 +55,7 @@ Matrix<T>::Matrix() {
 
 template<typename T>
 Matrix<T>::Matrix(shape2d_t shape, T value) {
-  reshape(shape.rows(), shape.cols(), value);
+  reshape(shape.rows_, shape.cols_, value);
 }
 
 template<typename T>

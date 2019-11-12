@@ -75,6 +75,8 @@ class Layer {
   matrix_t& getEdgeGradient(std::string edgeName);
   const matrix_t& getEdgeGradient(std::string edgeName) const;
 
+  void setEdgeData(std::string edgeName, const matrix_t& data);
+  void setEdgeGradient(std::string edgeName, const matrix_t& gradient);
 };
 
 Layer::Layer() {}
@@ -194,6 +196,22 @@ matrix_t& Layer::getEdgeGradient(std::string edgeName) {
 
 const matrix_t& Layer::getEdgeGradient(std::string edgeName) const {
   return edges.at(edgeName) -> getGradient();
+}
+
+void Layer::setEdgeData(std::string edgeName, const matrix_t& data) {
+  matrix_t& dest = getEdgeData(edgeName);
+  if (dest.shape() != data.shape()) {
+    throw BorjomiRuntimeException("Invalid shape");
+  }
+  dest = data;
+}
+
+void Layer::setEdgeGradient(std::string edgeName, const matrix_t& gradient) {
+  matrix_t& dest = getEdgeGradient(edgeName);
+  if (dest.shape() != gradient.shape()) {
+    throw BorjomiRuntimeException("Invalid shape");
+  }
+  dest = gradient;
 }
 
 }

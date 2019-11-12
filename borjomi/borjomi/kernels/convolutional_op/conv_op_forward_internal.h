@@ -25,7 +25,7 @@ void convForwardInternal(const matrix_t& inData, const matrix_t& W,
             float sum = 0;
             for (size_t weightRowIdx = 0; weightRowIdx < weightShape.rows_; weightRowIdx++) {
               for (size_t weightColIdx = 0; weightColIdx < weightShape.cols_; weightColIdx++) {                
-                size_t inIdx = inPaddedShape.getIndex(outRowIdx + weightColIdx, outColIdx + weightRowIdx, inChannelIdx);
+                size_t inIdx = inPaddedShape.getIndex(outRowIdx + weightRowIdx, outColIdx + weightColIdx, inChannelIdx);
                 size_t weightIdx = weightShape.getIndex(weightRowIdx, weightColIdx, inShape.channels_ * outChannelIdx + inChannelIdx);
                 sum += W.at(0, weightIdx) * inData.at(sampleIdx, inIdx);
               }

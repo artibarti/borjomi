@@ -34,13 +34,6 @@ class FullyConnectedLayer : public TrainableLayer {
     } else {
       fullyConnectedForwardOp(getEngine(), inData, weights, matrix_t(), outData);
     }
-
-    /*
-    if (hasBias()) {
-      copy(getEngine(), 0.0, false, getEdgeData("bias"), outData);
-    }
-    multiply(getEngine(), 1.0, false, inData, true, weights, 1.0, outData);
-    */
   }
 
   void backPropagation() override {
@@ -53,21 +46,13 @@ class FullyConnectedLayer : public TrainableLayer {
 
     if (hasBias()) {
       matrix_t& dBias = getEdgeGradient("bias");
-      fullyConnectedBackwardOp(getEngine(), prevOut, weights, dWeights, dBias, currDelta, prevDelta);
+      fullyConnectedBackwardOp(getEngine(), prevOut,
+        weights, dWeights, dBias, currDelta, prevDelta);
     } else {
       matrix_t empty;
-      fullyConnectedBackwardOp(getEngine(), prevOut, weights, dWeights, empty, currDelta, prevDelta);
+      fullyConnectedBackwardOp(getEngine(), prevOut,
+        weights, dWeights, empty, currDelta, prevDelta);
     }
-
-    /*
-    multiply(getEngine(), 1.0f, false, currDelta, false, weights, 1.0f, prevDelta);
-    multiply(getEngine(), 1.0f, true, currDelta, false, prevOut, 1.0f, dWeights);
-
-    if (hasBias()) {
-      matrix_t identity(currDelta.rows(), 1, float{1});
-      multiply(getEngine(), 1.0, true, currDelta, false, identity, 1.0, getEdgeGradient("bias"));
-    }
-    */
   }
 
   void initialize() override {  

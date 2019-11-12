@@ -24,8 +24,6 @@ class ConvolutionalLayer : public TrainableLayer {
 
  private:
   size_t padding_;
-  shape3d_t weight_;
-  shape3d_t inPadded_;
 
  public:
   ConvolutionalLayer(size_t inWidth, size_t inHeight, size_t inChannels, size_t kernelWidth, size_t kernelHeight,

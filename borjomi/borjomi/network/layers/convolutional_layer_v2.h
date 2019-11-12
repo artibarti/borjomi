@@ -1,10 +1,3 @@
-/*
-    Copyright (c) 2013, Taiga Nomi and the respective contributors
-    All rights reserved.
-
-    Use of this source code is governed by a BSD-style license that can be found
-    in the LICENSE file.
-*/
 #pragma once
 
 #include <algorithm>
@@ -23,8 +16,15 @@ namespace borjomi {
 class ConvolutionalLayerV2 : public TrainableLayer {
 
  private:
+  shape2d_t weightsShape_;
   shape3d_t weightShape_;
+
   size_t kernelSize_;
+
+  shape3d_t reorganizedInShape_;
+
+  matrix_t reorganizedInData_;
+  matrix_t reorganizedPrevDelta_;
 
  public:
   ConvolutionalLayerV2(size_t inWidth, size_t inHeight, size_t inChannels, size_t kernelSize,
@@ -32,16 +32,20 @@ class ConvolutionalLayerV2 : public TrainableLayer {
     : TrainableLayer(shape3d_t(inWidth, inHeight, inChannels),
       shape3d_t(inWidth, inHeight, outChannels), hasBias, engine) {
 
-    shape3d_t inShape = shape3d_t(inWidth, inHeight, inChannels);
-    shape3d_t outShape = shape3d_t(inWidth, inHeight, outChannels);
     kernelSize_ = kernelSize;
-    weightShape_ = shape3d_t(kernelSize, kernelSize, inChannels * outChannels);
+    weightShape_ = shape3d_t(kernelSize, inChannels, kernelSize);
+    weightsShape_ = shape2d_t(outChannels, weightShape_.size());
+    reorganizedInShape_ = shape3d_t(inHeight, inChannels, inWidth);
   }
 
   ConvolutionalLayerV2(ConvolutionalLayerV2&& other) 
     : TrainableLayer(std::move(other)) {
     kernelSize_ = other.kernelSize_;
     weightShape_ = other.weightShape_;
+    weightsShape_ = other.weightsShape_;
+    reorganizedPrevDelta_ = other.reorganizedPrevDelta_;
+    reorganizedInData_ = other.reorganizedInData_;
+    reorganizedInShape_ = other.reorganizedInShape_;
   }
 
   void initialize() override {
@@ -49,9 +53,8 @@ class ConvolutionalLayerV2 : public TrainableLayer {
     size_t fanInSize = weightShape_.rows_ * weightShape_.cols_ * getInputShape().channels_;
     size_t fanOutSize = weightShape_.rows_ * weightShape_.cols_ * getOutputShape().channels_;
 
-    shape2d_t weightShape = shape2d_t(1, weightShape_.size());
-    if (getEdge("weight") -> shape() != weightShape) {
-      reshapeEdge("weight", weightShape);
+    if (getEdge("weight") -> shape() != weightsShape_) {
+      reshapeEdge("weight", weightsShape_);
       WeightInitializer::initialize(WeightInitializerType::xavier,
         getEdgeData("weight"), fanInSize, fanOutSize);
     }
@@ -66,6 +69,8 @@ class ConvolutionalLayerV2 : public TrainableLayer {
 
   void setBatchSize(size_t batchSize = 1) override {
     TrainableLayer::setBatchSize(batchSize);
+    reorganizedInData_.reshape(batchSize, getInputShape().size());
+    reorganizedPrevDelta_.reshape(batchSize, getInputShape().size());
   }
 
   void forwardPropagation() override {
@@ -75,29 +80,28 @@ class ConvolutionalLayerV2 : public TrainableLayer {
     matrix_t& weights = getEdgeData("weight");
     matrix_t& bias = getEdgeData("bias");
 
-    matrix_t reorganizedInput(inData.shape());
-    matrix_t reorganizedWeights(weights.shape());
+    shuffleColAndChannelDimesions(inData, getInputShape(), reorganizedInData_);
 
-    for (size_t idx = 0; idx < outData.size(); idx++) {
-      outData.at(idx) = 0;
-    }
-
-    convv2ForwardOp(getEngine(), reorganizedInput, reorganizedWeights,
-      bias, outData, getInputShape(), getOutputShape(), kernelSize_);
+    convv2ForwardOp(engine_t::internal, reorganizedInData_, weights,
+      bias, outData, reorganizedInShape_, getOutputShape(), kernelSize_);
   }
 
   void backPropagation() override {
 
-    // matrix_t& prevOut = getEdgeData("incomingEdge");
-    // matrix_t& weights = getEdgeData("weight");
-    // matrix_t& dWeight = getEdgeGradient("weight");
-    // matrix_t& db = getEdgeGradient("bias");
-    // matrix_t& prevDelta = getEdgeGradient("incomingEdge");
-    // matrix_t& currDelta = getEdgeGradient("outgoingEdge");
+    matrix_t& prevOut = getEdgeData("incomingEdge");
+    matrix_t& weights = getEdgeData("weight");
+    matrix_t& dWeight = getEdgeGradient("weight");
+    matrix_t& db = getEdgeGradient("bias");
+    matrix_t& prevDelta = getEdgeGradient("incomingEdge");
+    matrix_t& currDelta = getEdgeGradient("outgoingEdge");
 
-    // for (size_t idx = 0; idx < prevDelta.size(); idx++) {
-    //   prevDelta.at(idx) = 0;
-    // }
+    for (size_t idx = 0; idx < prevDelta.size(); idx++) {
+      prevDelta.at(idx) = 0;
+    }
+
+    convv2BackwardOp(getEngine(), prevOut, reorganizedInData_, weights, dWeight, db,
+      currDelta, prevDelta, weightShape_, getInputShape(), reorganizedInShape_,
+      getOutputShape(), kernelSize_);
   }
 
   std::string getLayerType() const override {
@@ -105,37 +109,16 @@ class ConvolutionalLayerV2 : public TrainableLayer {
   }
 
  private:
+  void shuffleColAndChannelDimesions(const matrix_t& input,
+    const shape3d_t& currentShape, matrix_t& reshaped) {
 
-  void reorganizeInputForConvolutionalLayerForwardOp(const matrix_t& input,
-    const shape3d_t& originalShape, matrix_t& reshaped) {
-
-    shape3d_t newShape(originalShape.cols_, originalShape.channels_, originalShape.rows_);
-    reshaped.reshape(input.rows(), newShape.size_);
+    shape3d_t newShape(currentShape.rows_, currentShape.channels_, currentShape.cols_);
     for (size_t sampleIdx = 0; sampleIdx < input.rows(); sampleIdx++) {
-      for (size_t originalChannelIdx = 0; originalChannelIdx < originalShape.channels_; originalChannelIdx++) {
-        for (size_t originalRowIdx = 0; originalRowIdx < originalShape.rows_; originalRowIdx++) {
-          for (size_t originalColIdx = 0; originalColIdx < originalShape.cols_; originalColIdx++) {
-            reshaped.at(sampleIdx, newShape.getIndex(originalColIdx, originalChannelIdx, originalRowIdx))
-              = input.at(sampleIdx, originalShape.getIndex(originalRowIdx, originalColIdx, originalChannelIdx));
-          }
-        }
-      }
-    }
-  }
-
-  void reorganizeWeights(const matrix_t& weights, matrix_t& reorganizedWeights,
-    size_t kernelSize, const shape3d_t& inShape, const shape3d_t& outShape) {
-
-    for (size_t outChannelIdx = 0; outChannelIdx < outShape.channels_; outChannelIdx++) {
-      size_t idx = 0;
-      for (size_t rowIdx = 0; rowIdx < kernelSize; rowIdx++) {
-        for (size_t colIdx = 0; colIdx < kernelSize; colIdx++) {
-          for (size_t inChannelIdx = 0; inChannelIdx < inShape.channels_; inChannelIdx++) {
-            size_t originalIdx = (outChannelIdx * inShape.channels_ + inChannelIdx) * (kernelSize * kernelSize)
-              + rowIdx * kernelSize + colIdx;
-            size_t newIdx = (outChannelIdx * inShape.channels_) * (kernelSize * kernelSize) + idx;
-            reorganizedWeights.at(0, newIdx) = weights.at(0, originalIdx);
-            idx++;
+      for (size_t originalChannelIdx = 0; originalChannelIdx < currentShape.channels_; originalChannelIdx++) {
+        for (size_t originalRowIdx = 0; originalRowIdx < currentShape.rows_; originalRowIdx++) {
+          for (size_t originalColIdx = 0; originalColIdx < currentShape.cols_; originalColIdx++) {
+            reshaped.at(sampleIdx, newShape.getIndex(originalRowIdx, originalChannelIdx, originalColIdx))
+              = input.at(sampleIdx, currentShape.getIndex(originalRowIdx, originalColIdx, originalChannelIdx));
           }
         }
       }

@@ -50,4 +50,27 @@ size_t getIndexOfMaxElementInRow(const matrix_t& matrix, size_t rowIndex) {
   return maxIndex;
 }
 
+std::pair<int, float> compare(const matrix_t& one, const matrix_t& other) {
+  
+  if (one.shape() != other.shape()) {
+    throw BorjomiRuntimeException("compare: Matrices are incompatible, shapes are different");
+  }
+
+  shape2d_t matrixShape = one.shape();
+  std::pair<int, float> result(0, 0.0);
+  for (size_t rowIdx = 0; rowIdx < matrixShape.rows_; rowIdx++) {
+    for (size_t colIdx = 0; colIdx < matrixShape.cols_; colIdx++) {
+      float distance = std::abs(one.at(rowIdx, colIdx) - other.at(rowIdx, colIdx));
+      if (distance >= 0.01) {
+        std::cout << one.at(rowIdx, colIdx) << "\t" << other.at(rowIdx, colIdx)
+          << "\t" << rowIdx << "x" << colIdx << std::endl;
+        result.first++;
+        result.second += distance;
+      }
+    }
+  }
+  result.second /= std::max(result.first, 1);
+  return result;
+}
+
 }

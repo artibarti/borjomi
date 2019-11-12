@@ -80,6 +80,9 @@ Network& Network::operator<< (Layer&& layer) {
 template<LossFunctionType lossFuncType>
 void Network::backProp(const matrix_t& output, const matrix_t& target) {
 
+  // log(output, "forw out");
+  // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
   matrix_t delta(output.shape());
   LossCalculator::getLossMatrix<lossFuncType>(output, target, delta);
   layers_.backward(delta);

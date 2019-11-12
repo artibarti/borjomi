@@ -17,11 +17,14 @@ namespace borjomi {
     }
   }
 
-  void convv2BackwardOp(engine_t engine, const matrix_t& prevOut, const matrix_t& weights,
-    matrix_t& dWeights, matrix_t& dBias, const matrix_t& currDelta, matrix_t& prevDelta) {
+  void convv2BackwardOp(engine_t engine, const matrix_t& prevOut, const matrix_t& reorganizedPrevOut,
+    const matrix_t& W, matrix_t& dW, matrix_t& db, const matrix_t& currDelta,
+    matrix_t& reorganizedPrevDelta, const shape3d_t& weightShape, const shape3d_t& inShape,
+    const shape3d_t& reorderedInShape, const shape3d_t& outShape, size_t kernelSize) {
 
     if (engine == engine_t::internal) {
-      kernels::convv2BackwardInternal(prevOut, weights, dWeights, dBias, currDelta, prevDelta);
+      kernels::convv2BackwardInternal(prevOut, reorganizedPrevOut, W, dW, db,
+        currDelta, reorganizedPrevDelta, weightShape, inShape, reorderedInShape, outShape, kernelSize);
     } else {
       throw BorjomiRuntimeException("Engine is not supported: " + toString(engine));
     }

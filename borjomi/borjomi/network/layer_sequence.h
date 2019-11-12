@@ -126,7 +126,6 @@ void LayerSequence::connect(Layer* first, Layer* second) {
   auto outShape = first->getOutputShape();
   auto inShape  = second->getInputShape();
   if (outShape.size() != inShape.size()) {
-    std::cout << inShape << " " << outShape << std::endl;
     throw BorjomiRuntimeException("Impossible to connect layers due to dimension mismatch");
   }
   second->setEdge("incomingEdge", first->getEdge("outgoingEdge"));
@@ -139,7 +138,7 @@ void LayerSequence::addLayer(T&& layer) {
 
   if (layers.back() -> isActivation()) {
     if (layers.size() == 1) {
-      throw new BorjomiRuntimeException("An activation layer should not be the first one in the network");
+      throw BorjomiRuntimeException("An activation layer should not be the first one in the network");
     } else {
       getLayer(layers.size() - 2) -> getOutputShape();
       layers.back() -> setInputShape(getLayer(layers.size() - 2) -> getOutputShape());

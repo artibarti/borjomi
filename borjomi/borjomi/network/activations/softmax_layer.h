@@ -39,7 +39,8 @@ class SoftmaxLayer : public ActivationLayer {
 
     for(size_t rowIdx = 0; rowIdx < x.rows(); rowIdx++) {
       for (size_t j = 0; j < x.cols(); j++) {
-        float* df = new float[x.cols()];
+        std::vector<float> df(x.cols());
+        // float* df = new float[x.cols()];
         for (size_t k = 0; k < x.cols(); k++) {
           df[k] = (k == j) ? y.at(rowIdx, j) * (float(1) - y.at(rowIdx, j)) : -y.at(rowIdx, k) * y.at(rowIdx, j);
         }
@@ -50,22 +51,6 @@ class SoftmaxLayer : public ActivationLayer {
         dx.at(rowIdx, j) = sum;
       }
     }
-
-    /*
-    for(size_t colIdx = 0; colIdx < x.cols(); colIdx++) {
-      for (size_t j = 0; j < x.rows(); j++) {
-        float* df = new float[x.rows()];
-        for (size_t k = 0; k < x.rows(); k++) {
-          df[k] = (k == j) ? y.at(j, colIdx) * (float(1) - y.at(j, colIdx)) : -y.at(k, colIdx) * y.at(j, colIdx);
-        }
-        float sum = 0;
-        for (size_t k = 0; k < x.rows(); k++) {
-          sum += (dy.at(k, colIdx) * df[k]);
-        }
-        dx.at(j, colIdx) = sum;
-      }
-    }
-    */
   }
 
   std::pair<float, float> scale() const override {
