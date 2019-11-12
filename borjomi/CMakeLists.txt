@@ -57,7 +57,8 @@ option(USE_INTEL_MKL  "Build borjomi with Intel MKL library support"      OFF)
 option(USE_THREADS    "Build borjomi with pthread support"                OFF)
 option(USE_CUDA       "Build borjomi with OpenCL library support"         OFF)
 
-option(BUILD_EXAMPLES "Set to ON to build examples"                         ON)
+option(BUILD_EXAMPLES "Set to ON to build examples"                        ON)
+option(BUILD_TESTS    "Set to ON to build tests"                           ON)
 
 ###############################################################
 ###### Create the library target ##############################
@@ -275,6 +276,10 @@ install(DIRECTORY   ${PROJECT_SOURCE_DIR}/${project_library_target_name}
 
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
+endif(BUILD_EXAMPLES)
+
+if(BUILD_TESTS)
+    add_subdirectory(tests)
 endif(BUILD_EXAMPLES)
 
 ##############################################################

@@ -27,7 +27,3 @@ target_link_libraries(example_mnist_train
 add_executable(example_test_multiplication engine_test/testMultiplication.cpp ${borjomi_headers})
 target_link_libraries(example_test_multiplication 
         ${project_library_target_name} ${REQUIRED_LIBRARIES})
-
-add_executable(example_test_conv_layer tests/conv_test.cpp ${borjomi_headers})
-target_link_libraries(example_test_conv_layer 
-        ${project_library_target_name} ${REQUIRED_LIBRARIES})        
