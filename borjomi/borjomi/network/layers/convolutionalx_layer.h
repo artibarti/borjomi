@@ -13,7 +13,7 @@
 
 namespace borjomi {
 
-class ConvolutionalLayerV2 : public TrainableLayer {
+class ConvolutionalXLayer : public TrainableLayer {
 
  private:
   shape2d_t weightsShape_;
@@ -27,7 +27,7 @@ class ConvolutionalLayerV2 : public TrainableLayer {
   matrix_t reorganizedPrevDelta_;
 
  public:
-  ConvolutionalLayerV2(size_t inWidth, size_t inHeight, size_t inChannels, size_t kernelSize,
+  ConvolutionalXLayer(size_t inWidth, size_t inHeight, size_t inChannels, size_t kernelSize,
     size_t outChannels, padding paddingType = padding::valid, bool hasBias = true, engine_t engine = engine_t::internal)
     : TrainableLayer(shape3d_t(inWidth, inHeight, inChannels),
       shape3d_t(inWidth, inHeight, outChannels), hasBias, engine) {
@@ -38,7 +38,7 @@ class ConvolutionalLayerV2 : public TrainableLayer {
     reorganizedInShape_ = shape3d_t(inHeight, inChannels, inWidth);
   }
 
-  ConvolutionalLayerV2(ConvolutionalLayerV2&& other) 
+  ConvolutionalXLayer(ConvolutionalXLayer&& other) 
     : TrainableLayer(std::move(other)) {
     kernelSize_ = other.kernelSize_;
     weightShape_ = other.weightShape_;
@@ -82,8 +82,8 @@ class ConvolutionalLayerV2 : public TrainableLayer {
 
     shuffleColAndChannelDimesions(inData, getInputShape(), reorganizedInData_);
 
-    convv2ForwardOp(engine_t::internal, reorganizedInData_, weights,
-      bias, outData, reorganizedInShape_, getOutputShape(), kernelSize_);
+    convxForwardOp(engine_t::internal, reorganizedInData_, weights,
+      bias, outData, reorganizedInShape_, getOutputShape(), weightShape_);
   }
 
   void backPropagation() override {
@@ -99,9 +99,8 @@ class ConvolutionalLayerV2 : public TrainableLayer {
       prevDelta.at(idx) = 0;
     }
 
-    convv2BackwardOp(getEngine(), prevOut, reorganizedInData_, weights, dWeight, db,
-      currDelta, prevDelta, weightShape_, getInputShape(), reorganizedInShape_,
-      getOutputShape(), kernelSize_);
+    convxBackwardOp(getEngine(), prevOut, weights, dWeight, db,
+      currDelta, prevDelta, weightShape_, getInputShape(), getOutputShape());
   }
 
   std::string getLayerType() const override {

@@ -19,22 +19,22 @@ using namespace borjomi;
 void constructNetwork(Network& net) {
 
   using conv = ConvolutionalLayer;
-  using convv2 = ConvolutionalLayerV2;
+  using convx = ConvolutionalXLayer;
   using pool = MaxPoolingLayer;
   using fc = FullyConnectedLayer;
   using relu = ReluLayer;
   using softmax = SoftmaxLayer;
 
   // net << conv(32, 32, 3, 5, 5, 32, padding::same, true, engine_t::avx);
-  net << convv2(32, 32, 3, 5, 32, padding::same, true, engine_t::internal);
+  net << convx(32, 32, 3, 5, 32, padding::same, true, engine_t::internal);
   net << pool(32, 32, 32, 2, engine_t::threads);
   net << relu();
-  net << convv2(16, 16, 32, 5, 32, padding::same, true, engine_t::internal);
+  net << convx(16, 16, 32, 5, 32, padding::same, true, engine_t::internal);
   // net << conv(16, 16, 32, 5, 5, 32, padding::same, true, engine_t::avx);
   net << pool(16, 16, 32, 2, engine_t::threads);
   net << relu();
   net << conv(8, 8, 32, 5, 5, 64, padding::same, true, engine_t::avx);
-  // net << convv2(8, 8, 32, 5, 64, padding::same, true, engine_t::internal);
+  // net << convx(8, 8, 32, 5, 64, padding::same, true, engine_t::internal);
   net << pool(8, 8, 64, 2, engine_t::threads);
   net << relu();
   net << fc(1024, 64, true, engine_t::avx);

@@ -2,7 +2,7 @@
 
 #include "borjomi/kernels/fully_connected_op/fully_connected_op.h"
 #include "borjomi/kernels/convolutional_op/conv_op.h"
-#include "borjomi/kernels/convolutionalv2_op/convv2_op.h"
+#include "borjomi/kernels/convolutionalx_op/convx_op.h"
 
 #include "borjomi/kernels/maxpool_op/maxpool_op.h"
 #include "borjomi/kernels/minpool_op/minpool_op.h"

@@ -45,15 +45,15 @@ matrix_t generateBias() {
 void testConvLayer() {
 
   ConvolutionalLayer conv(32, 32, 3, 5, 5, 32, padding::same, true, engine_t::internal);
-  ConvolutionalLayerV2 convv2(32, 32, 3, 5, 32, padding::same, true, engine_t::internal);
+  ConvolutionalXLayer convx(32, 32, 3, 5, 32, padding::same, true, engine_t::internal);
 
   size_t batchSize = 10;
 
   conv.initialize();
-  convv2.initialize();
+  convx.initialize();
 
   conv.setBatchSize(batchSize);
-  convv2.setBatchSize(batchSize);
+  convx.setBatchSize(batchSize);
 
   matrix_t data(batchSize, 32 * 32 * 3);
   matrix_t grad(batchSize, 32 * 32 * 32);
@@ -69,7 +69,7 @@ void testConvLayer() {
   matrix_t weights = generateWeights();
 
 	matrix_t weightsForConv(1, 5*5*96);
-	matrix_t weightsForConvv2(32, 5*3*5);
+	matrix_t weightsForConvx(32, 5*3*5);
 
 	for (size_t rowIdx = 0; rowIdx < weights.rows(); rowIdx++) {
 		for (size_t colIdx = 0; colIdx < weights.cols(); colIdx++) {
@@ -77,58 +77,58 @@ void testConvLayer() {
 		}
 	}
 
-  shuffleColAndChannelDimesions(weights, shape3d_t(5,5,3), weightsForConvv2);
+  shuffleColAndChannelDimesions(weights, shape3d_t(5,5,3), weightsForConvx);
 
   matrix_t bias = generateBias();
 
   conv.setEdgeData("weight", weightsForConv);
-  convv2.setEdgeData("weight", weightsForConvv2);
+  convx.setEdgeData("weight", weightsForConvx);
   conv.setEdgeData("bias", bias);
-  convv2.setEdgeData("bias", bias);
+  convx.setEdgeData("bias", bias);
 
   conv.setEdgeData("incomingEdge", data);
-  convv2.setEdgeData("incomingEdge", data);
+  convx.setEdgeData("incomingEdge", data);
 
   conv.forward();
-  convv2.forward();
+  convx.forward();
 
   matrix_t convOutput = conv.getEdgeData("outgoingEdge");
-  matrix_t convv2Output = convv2.getEdgeData("outgoingEdge");
+  matrix_t convxOutput = convx.getEdgeData("outgoingEdge");
 
-  std::pair<int, float> compareResult = compare(convOutput, convv2Output);
+  std::pair<int, float> compareResult = compare(convOutput, convxOutput);
   std::cout << "Comparing forward outputs:" << std::endl;
   std::cout << "  Number of differences: " << compareResult.first << std::endl;
   std::cout << "  Max distance: " << compareResult.second << std::endl;
 
   conv.setEdgeGradient("outgoingEdge", grad);
-  convv2.setEdgeGradient("outgoingEdge", grad);
+  convx.setEdgeGradient("outgoingEdge", grad);
 
   conv.backward();
   std::cout << "\n\n";
-  convv2.backward();
+  convx.backward();
 
   matrix_t convPrevGrad = conv.getEdgeGradient("incomingEdge");
-  matrix_t convv2PrevGrad = convv2.getEdgeGradient("incomingEdge");
+  matrix_t convxPrevGrad = convx.getEdgeGradient("incomingEdge");
 
   matrix_t convWeightGrad = conv.getEdgeGradient("weight");
-  matrix_t convv2WeightGrad = convv2.getEdgeGradient("weight");
-  matrix_t convv2WeightGradReordered(convv2WeightGrad.shape());
-  shuffleColAndChannelDimesions(convv2WeightGrad, shape3d_t(5,3,5), convv2WeightGradReordered);
-  matrix_t convv2WeightGradSingleRow(shape2d_t(1, 5*5*96));
+  matrix_t convxWeightGrad = convx.getEdgeGradient("weight");
+  matrix_t convxWeightGradReordered(convxWeightGrad.shape());
+  shuffleColAndChannelDimesions(convxWeightGrad, shape3d_t(5,3,5), convxWeightGradReordered);
+  matrix_t convxWeightGradSingleRow(shape2d_t(1, 5*5*96));
 
-	for (size_t rowIdx = 0; rowIdx < convv2WeightGradReordered.rows(); rowIdx++) {
-		for (size_t colIdx = 0; colIdx < convv2WeightGradReordered.cols(); colIdx++) {
-			convv2WeightGradSingleRow.at(0, rowIdx * 5*5*3 + colIdx)
-        = convv2WeightGradReordered.at(rowIdx, colIdx);
+	for (size_t rowIdx = 0; rowIdx < convxWeightGradReordered.rows(); rowIdx++) {
+		for (size_t colIdx = 0; colIdx < convxWeightGradReordered.cols(); colIdx++) {
+			convxWeightGradSingleRow.at(0, rowIdx * 5*5*3 + colIdx)
+        = convxWeightGradReordered.at(rowIdx, colIdx);
 		}
 	}
 
-  compareResult = compare(convPrevGrad, convv2PrevGrad);
+  compareResult = compare(convPrevGrad, convxPrevGrad);
   std::cout << "Comparing prev gradients:" << std::endl;
   std::cout << "  Number of differences: " << compareResult.first << std::endl;
   std::cout << "  Max distance: " << compareResult.second << std::endl;
 
-  compareResult = compare(convWeightGrad, convv2WeightGradSingleRow);
+  compareResult = compare(convWeightGrad, convxWeightGradSingleRow);
   std::cout << "Comparing weight gradients:" << std::endl;
   std::cout << "  Number of differences: " << compareResult.first << std::endl;
   std::cout << "  Max distance: " << compareResult.second << std::endl;
