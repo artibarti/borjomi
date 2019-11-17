@@ -26,10 +26,10 @@ void constructNetwork(Network& net) {
   using softmax = SoftmaxLayer;
 
   // net << conv(32, 32, 3, 5, 5, 32, padding::same, true, engine_t::avx);
-  net << convx(32, 32, 3, 5, 32, padding::same, true, engine_t::internal);
+  net << convx(32, 32, 3, 5, 32, padding::same, true, engine_t::avx);
   net << pool(32, 32, 32, 2, engine_t::threads);
   net << relu();
-  net << convx(16, 16, 32, 5, 32, padding::same, true, engine_t::internal);
+  net << convx(16, 16, 32, 5, 32, padding::same, true, engine_t::avx);
   // net << conv(16, 16, 32, 5, 5, 32, padding::same, true, engine_t::avx);
   net << pool(16, 16, 32, 2, engine_t::threads);
   net << relu();

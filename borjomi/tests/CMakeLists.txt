@@ -20,5 +20,8 @@ endif()
 ### Adding examples ###################
 #######################################
 
-add_executable(test_conv_layer convolutional_layer_tests/convolutional_layer_test.cpp ${borjomi_headers})
-target_link_libraries(test_conv_layer ${project_library_target_name} ${REQUIRED_LIBRARIES})        
+add_executable(test_conv_and_convx_similarity convolutional_and_convolutionalx_similarity_tests/convolutional_and_convolutionalx_similarity_test.cpp ${borjomi_headers})
+target_link_libraries(test_conv_and_convx_similarity ${project_library_target_name} ${REQUIRED_LIBRARIES})
+
+add_executable(test_convx_layer convolutionalx_layer_tests/convolutionalx_layer_test.cpp ${borjomi_headers})
+target_link_libraries(test_convx_layer ${project_library_target_name} ${REQUIRED_LIBRARIES})
